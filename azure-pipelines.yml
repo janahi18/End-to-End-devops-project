@@ -1,0 +1,58 @@
+trigger:
+  branches:
+    include:
+      - main          # Pipeline runs on every push to main
+
+variables:
+  acrName: 'mycicddemoacr'
+  imageName: 'flask-app'
+  webAppName: 'flask-cicd-demo-app'
+  resourceGroup: 'rg-cicd-demo'
+  tag: '$(Build.BuildId)'     # Unique tag per build
+
+stages:
+
+# ─────────────────────────────────────────
+# STAGE 1: BUILD & PUSH DOCKER IMAGE TO ACR
+# ─────────────────────────────────────────
+- stage: Build
+  displayName: 'Build & Push to ACR'
+  jobs:
+  - job: BuildJob
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+
+    - task: Docker@2
+      displayName: 'Build Docker Image'
+      inputs:
+        command: build
+        dockerfile: Dockerfile
+        tags: $(tag)
+
+    - task: Docker@2
+      displayName: 'Push to Azure Container Registry'
+      inputs:
+        command: push
+        containerRegistry: 'ACR-ServiceConnection'   # Created in Azure DevOps
+        repository: $(imageName)
+        tags: $(tag)
+
+# ─────────────────────────────────────────
+# STAGE 2: DEPLOY TO AZURE WEB APP
+# ─────────────────────────────────────────
+- stage: Deploy
+  displayName: 'Deploy to Azure Web App'
+  dependsOn: Build
+  jobs:
+  - job: DeployJob
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+
+    - task: AzureWebAppContainer@1
+      displayName: 'Deploy Container to Web App'
+      inputs:
+        azureSubscription: 'Azure-ServiceConnection'  # Created in Azure DevOps
+        appName: $(webAppName)
+        imageName: '$(acrName).azurecr.io/$(imageName):$(tag)'
