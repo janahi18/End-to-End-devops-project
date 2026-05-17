@@ -6,7 +6,7 @@ pool:
 
 variables:
   imageName: devops-app
-  acrName: devopsacr123
+  acrName:  janahidevopsacr
 
 stages:
 
@@ -70,4 +70,4 @@ stages:
                 k8s/service.yaml
 
               containers: |
-                devopsacr123.azurecr.io/devops-app:$(Build.BuildId)
+                 janahidevopsacr.azurecr.io/devops-app:$(Build.BuildId)
