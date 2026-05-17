@@ -1,12 +1,9 @@
-FROM python:3.11-slim
+FROM nginx:latest
 
-WORKDIR /app
+# Copy application files
+COPY app/index.html /usr/share/nginx/html/index.html
 
-COPY requirements.txt .
-RUN pip install -r requirements.txt
+# Copy nginx configuration
+COPY app/nginx.conf /etc/nginx/conf.d/default.conf
 
-COPY app.py .
-
-EXPOSE 5000
-
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+EXPOSE 80
