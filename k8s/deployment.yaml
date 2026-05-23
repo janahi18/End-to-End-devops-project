@@ -20,7 +20,7 @@ spec:
       containers:
       - name: devops-app
 
-        image:  janahidevopsacr.azurecr.io/devops-app:$(Build.BuildId)
+        image: janahidevopsacr.azurecr.io/devops-app:latest
 
         ports:
         - containerPort: 80
