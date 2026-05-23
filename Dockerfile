@@ -1,4 +1,4 @@
-FROM nginx:latest
+FROM mcr.microsoft.com/oss/nginx/nginx:1.25.5
 
 # Copy application files
 COPY app/index.html /usr/share/nginx/html/index.html
