@@ -1,9 +1,11 @@
-FROM mcr.microsoft.com/oss/nginx/nginx:1.25.5
+FROM mcr.microsoft.com/cbl-mariner/base/core:2.0
 
-# Copy application files
+RUN tdnf install -y nginx && \
+    tdnf clean all
+
 COPY app/index.html /usr/share/nginx/html/index.html
-
-# Copy nginx configuration
-COPY app/nginx.conf /etc/nginx/conf.d/default.conf
+COPY app/nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

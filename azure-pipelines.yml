@@ -5,32 +5,30 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  imageName: devops-app
   acrName: janahidevopsacr
+  imageName: devops-app
 
+# ==================================
+# BUILD STAGE
+# ==================================
 stages:
 
-# =========================
-# BUILD STAGE
-# =========================
 - stage: Build
   displayName: Build and Push Image
 
   jobs:
   - job: DockerBuild
-    displayName: Build Docker Image
+    displayName: Docker Build Job
 
     steps:
 
-    # Login to ACR
     - task: Docker@2
       displayName: Login to ACR
 
       inputs:
         command: login
-        containerRegistry: acr-connection
+        containerRegistry: acr-docker-connection
 
-    # Build and Push Image
     - task: Docker@2
       displayName: Build and Push Docker Image
 
@@ -38,22 +36,24 @@ stages:
         command: buildAndPush
         repository: $(imageName)
         dockerfile: Dockerfile
-        containerRegistry: acr-connection
+        containerRegistry: acr-docker-connection
 
         tags: |
           $(Build.BuildId)
-          latest
 
-# =========================
+# ==================================
 # DEPLOY STAGE
-# =========================
+# ==================================
+
 - stage: Deploy
   displayName: Deploy to AKS
 
   dependsOn: Build
 
   jobs:
+
   - deployment: DeployToAKS
+    displayName: AKS Deployment
 
     environment: production
 
@@ -61,10 +61,11 @@ stages:
       runOnce:
 
         deploy:
+
           steps:
 
           - task: KubernetesManifest@1
-            displayName: Deploy to AKS
+            displayName: Deploy Kubernetes Manifests
 
             inputs:
               action: deploy
@@ -72,8 +73,8 @@ stages:
               kubernetesServiceConnection: aks-connection
 
               manifests: |
-                k8s/deployment.yaml
-                k8s/service.yaml
+                $(System.DefaultWorkingDirectory)/k8s/deployment.yaml
+                $(System.DefaultWorkingDirectory)/k8s/service.yaml
 
               containers: |
                 janahidevopsacr.azurecr.io/devops-app:$(Build.BuildId)

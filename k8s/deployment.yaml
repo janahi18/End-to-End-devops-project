@@ -1,4 +1,5 @@
 apiVersion: apps/v1
+
 kind: Deployment
 
 metadata:
@@ -20,7 +21,7 @@ spec:
       containers:
       - name: devops-app
 
-        image: janahidevopsacr.azurecr.io/devops-app:latest
+        image: janahidevopsacr.azurecr.io/devops-app:81
 
         ports:
         - containerPort: 80
